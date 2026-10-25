@@ -2,7 +2,7 @@
 
 # Pomodoro App
 
-CS310 Mobile Application Development – Term Project (Group 26)
+CS310 Mobile Application Development Term Project (Group 26)
 
 ## About
 
