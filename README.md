@@ -15,7 +15,7 @@ Planned features:
 - Task list where tasks can be linked to study sessions
 - Study history with daily and weekly study time
 - Notifications when a session or break ends
-- User accounts with email and password
+- User accounts with email and password.
 
 Built with Flutter, Firebase Authentication and Cloud Firestore.
 
