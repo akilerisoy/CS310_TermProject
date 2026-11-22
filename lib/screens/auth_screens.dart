@@ -1,7 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../services/auth_service.dart';
+import '../spacing.dart';
 import '../theme.dart';
+
+/// App logo, a local image declared under assets in pubspec.yaml.
+const kLogoAsset = 'assets/images/logo.png';
 
 /// S1 Splash.
 class SplashScreen extends StatelessWidget {
@@ -14,12 +18,12 @@ class SplashScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.timer_outlined, size: 72, color: kInk),
-            SizedBox(height: 16),
+            Image(image: AssetImage(kLogoAsset), width: 96, height: 96),
+            SizedBox(height: Spacing.lg),
             Text('Pomodoro',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: kInk)),
-            SizedBox(height: 4),
-            Text('Study timer and task list', style: TextStyle(color: kMuted)),
+            SizedBox(height: Spacing.xs),
+            Text('Study timer and task list', style: AppText.muted),
             SizedBox(height: 48),
             SizedBox(
               width: 26,
@@ -159,21 +163,21 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+          padding: const EdgeInsets.fromLTRB(Spacing.page, 32, Spacing.page, Spacing.page),
           children: [
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
-              child: Icon(Icons.timer_outlined, size: 48, color: kInk),
+              child: Image.asset(kLogoAsset, width: 56, height: 56),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: Spacing.md),
             const Text('Log in',
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: kInk)),
-            const SizedBox(height: 4),
+            const SizedBox(height: Spacing.xs),
             const Text('Use the email and password you signed up with.',
-                style: TextStyle(color: kMuted)),
-            const SizedBox(height: 24),
-            const Text('Email', style: TextStyle(color: kMuted, fontSize: 12)),
-            const SizedBox(height: 4),
+                style: AppText.muted),
+            const SizedBox(height: Spacing.xxl),
+            const Text('Email', style: AppText.label),
+            const SizedBox(height: Spacing.xs),
             TextField(
               controller: email,
               keyboardType: TextInputType.emailAddress,
@@ -181,9 +185,9 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: const InputDecoration(hintText: 'student@sabanciuniv.edu'),
             ),
             _errorBox(emailError),
-            const SizedBox(height: 16),
-            const Text('Password', style: TextStyle(color: kMuted, fontSize: 12)),
-            const SizedBox(height: 4),
+            const SizedBox(height: Spacing.lg),
+            const Text('Password', style: AppText.label),
+            const SizedBox(height: Spacing.xs),
             TextField(
               controller: password,
               obscureText: hide,
@@ -196,12 +200,12 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             _errorBox(error),
-            const SizedBox(height: 12),
+            const SizedBox(height: Spacing.md),
             Align(
               alignment: Alignment.centerRight,
               child: _linkText('Forgot password?', () => widget.onForgot(email.text)),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.xl),
             FilledButton(
               onPressed: busy ? null : submit,
               child: busy
@@ -211,9 +215,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Text('Log in'),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: Spacing.xxxl),
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              const Text('New here? ', style: TextStyle(color: kMuted)),
+              const Text('New here? ', style: AppText.muted),
               _linkText('Create an account', widget.onSignUp),
             ]),
           ],
@@ -274,8 +278,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(label, style: const TextStyle(color: kMuted, fontSize: 12)),
-        const SizedBox(height: 4),
+        Text(label, style: AppText.label),
+        const SizedBox(height: Spacing.xs),
         TextField(
           controller: c,
           obscureText: obscure,
@@ -300,14 +304,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       appBar: AppBar(leading: BackButton(onPressed: widget.onBack)),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          padding: const EdgeInsets.fromLTRB(Spacing.page, 0, Spacing.page, Spacing.page),
           children: [
             const Text('Create an account',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: kInk)),
-            const SizedBox(height: 4),
+            const SizedBox(height: Spacing.xs),
             const Text('Your tasks, settings and study history are saved to it.',
-                style: TextStyle(color: kMuted)),
-            const SizedBox(height: 20),
+                style: AppText.muted),
+            const SizedBox(height: Spacing.xl),
             _field('Name', name, nameErr, hint: 'Name Surname'),
             _field('Email', email, emailErr,
                 hint: 'student@sabanciuniv.edu', type: TextInputType.emailAddress),
@@ -315,7 +319,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 obscure: true, helper: 'At least 6 characters'),
             _field('Confirm password', confirm, confirmErr, obscure: true),
             _errorBox(formErr),
-            const SizedBox(height: 12),
+            const SizedBox(height: Spacing.md),
             FilledButton(
               onPressed: busy ? null : submit,
               child: busy
@@ -325,9 +329,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Text('Create account'),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.xl),
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              const Text('Already have an account? ', style: TextStyle(color: kMuted)),
+              const Text('Already have an account? ', style: AppText.muted),
               _linkText('Log in', widget.onBack),
             ]),
           ],
@@ -394,13 +398,13 @@ class _ResetScreenState extends State<ResetScreen> {
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(Spacing.page),
           children: [
             const Text("Enter the email you signed up with. We'll send you a link to set a new password.",
-                style: TextStyle(color: kMuted)),
-            const SizedBox(height: 16),
-            const Text('Email', style: TextStyle(color: kMuted, fontSize: 12)),
-            const SizedBox(height: 4),
+                style: AppText.muted),
+            const SizedBox(height: Spacing.lg),
+            const Text('Email', style: AppText.label),
+            const SizedBox(height: Spacing.xs),
             TextField(
               controller: email,
               keyboardType: TextInputType.emailAddress,
@@ -408,7 +412,7 @@ class _ResetScreenState extends State<ResetScreen> {
               decoration: const InputDecoration(hintText: 'student@sabanciuniv.edu'),
             ),
             _errorBox(error),
-            const SizedBox(height: 16),
+            const SizedBox(height: Spacing.lg),
             FilledButton(
               onPressed: busy ? null : send,
               child: busy
@@ -419,12 +423,12 @@ class _ResetScreenState extends State<ResetScreen> {
                   : const Text('Send reset link'),
             ),
             if (sentTo != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: Spacing.lg),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: kSoft,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(Spacing.radius),
                 ),
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   const Icon(Icons.mail_outline, size: 18, color: kInk),
@@ -433,15 +437,15 @@ class _ResetScreenState extends State<ResetScreen> {
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text('Link sent to $sentTo',
                           style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: Spacing.xxs),
                       const Text('It can take a few minutes. Check your spam folder too.',
-                          style: TextStyle(color: kMuted, fontSize: 12)),
+                          style: AppText.label),
                     ]),
                   ),
                 ]),
               ),
             ],
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.xl),
             Center(child: _linkText('Back to log in', widget.onBack)),
           ],
         ),

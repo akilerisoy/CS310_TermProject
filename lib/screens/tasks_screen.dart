@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 import '../models/models.dart';
+import '../spacing.dart';
 import '../state/data_store.dart';
 import '../state/timer_controller.dart';
 import '../theme.dart';
@@ -37,19 +38,16 @@ class _TasksScreenState extends State<TasksScreen> {
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: const Text('Add task'),
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const TaskEditScreen()),
-        ),
+        onPressed: () => TaskEditScreen.open(context),
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+          padding: Spacing.pageTop,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Tasks',
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: kInk)),
-              const SizedBox(height: 12),
+              const Text('Tasks', style: AppText.pageTitle),
+              const SizedBox(height: Spacing.md),
               SizedBox(
                 width: double.infinity,
                 child: SegmentedButton<bool>(
@@ -60,26 +58,38 @@ class _TasksScreenState extends State<TasksScreen> {
                     foregroundColor: kInk,
                   ),
                   segments: [
-                    ButtonSegment(value: false, label: Text('To do ${data.todoTasks.length}')),
-                    ButtonSegment(value: true, label: Text('Done ${data.doneTasks.length}')),
+                    ButtonSegment(
+                      value: false,
+                      label: Text('To do ${data.todoTasks.length}'),
+                    ),
+                    ButtonSegment(
+                      value: true,
+                      label: Text('Done ${data.doneTasks.length}'),
+                    ),
                   ],
                   selected: {showDone},
                   onSelectionChanged: (s) => setState(() => showDone = s.first),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: Spacing.sm),
               Expanded(
                 child: list.isEmpty
                     ? Center(
                         child: Text(
-                          showDone ? 'No finished tasks yet.' : 'No tasks yet. Tap "Add task".',
-                          style: const TextStyle(color: kMuted),
+                          showDone
+                              ? 'No finished tasks yet.'
+                              : 'No tasks yet. Tap "Add task".',
+                          style: AppText.muted,
                         ),
                       )
                     : ListView.separated(
-                        padding: const EdgeInsets.only(bottom: 90),
+                        padding: const EdgeInsets.only(
+                          top: Spacing.xs,
+                          bottom: 90,
+                        ),
                         itemCount: list.length,
-                        separatorBuilder: (_, _) => const Divider(height: 1, color: kSoft),
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(height: Spacing.sm),
                         itemBuilder: (context, i) {
                           final t = list[i];
                           final onTimer = timer.taskId == t.id;
@@ -87,52 +97,99 @@ class _TasksScreenState extends State<TasksScreen> {
                             key: ValueKey(t.id),
                             direction: DismissDirection.endToStart,
                             background: Container(
-                              color: kInk,
+                              decoration: BoxDecoration(
+                                color: kInk,
+                                borderRadius: BorderRadius.circular(
+                                  Spacing.radius,
+                                ),
+                              ),
                               alignment: Alignment.centerRight,
                               padding: const EdgeInsets.only(right: 20),
-                              child: const Icon(Icons.delete_outline, color: Colors.white),
+                              child: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.white,
+                              ),
                             ),
                             onDismissed: (_) => data.deleteTask(t.id),
-                            child: ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              leading: IconButton(
-                                tooltip: t.done ? 'Mark as to do' : 'Mark as done',
-                                icon: Icon(t.done
-                                    ? Icons.check_circle
-                                    : Icons.radio_button_unchecked),
-                                color: kInk,
-                                onPressed: () => data.setTaskDone(t.id, !t.done),
-                              ),
-                              title: Row(children: [
-                                Flexible(
-                                  child: Text(t.title,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          decoration:
-                                              t.done ? TextDecoration.lineThrough : null)),
+                            child: Card(
+                              margin: EdgeInsets.zero,
+                              elevation: 0,
+                              color: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  Spacing.radius,
                                 ),
-                                if (onTimer) ...[
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 1),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: kInk),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: const Text('On timer',
-                                        style: TextStyle(
-                                            fontSize: 10, fontWeight: FontWeight.w700)),
+                                side: const BorderSide(color: kLine),
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.only(
+                                  left: Spacing.xs,
+                                ),
+                                leading: IconButton(
+                                  tooltip: t.done
+                                      ? 'Mark as to do'
+                                      : 'Mark as done',
+                                  icon: Icon(
+                                    t.done
+                                        ? Icons.check_circle
+                                        : Icons.radio_button_unchecked,
                                   ),
-                                ],
-                              ]),
-                              subtitle: Text(_subtitle(data, t),
-                                  style: const TextStyle(fontSize: 12, color: kMuted)),
-                              onTap: () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                    builder: (_) => TaskEditScreen(task: t)),
+                                  color: kInk,
+                                  onPressed: () =>
+                                      data.setTaskDone(t.id, !t.done),
+                                ),
+                                title: Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        t.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          decoration: t.done
+                                              ? TextDecoration.lineThrough
+                                              : null,
+                                        ),
+                                      ),
+                                    ),
+                                    if (onTimer) ...[
+                                      const SizedBox(width: Spacing.sm),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 1,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: kInk),
+                                          borderRadius: BorderRadius.circular(
+                                            Spacing.radius,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'On timer',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                subtitle: Text(
+                                  _subtitle(data, t),
+                                  style: AppText.label,
+                                ),
+                                trailing: IconButton(
+                                  tooltip: 'Remove task',
+                                  icon: const Icon(Icons.delete_outline),
+                                  color: kInk,
+                                  onPressed: () => data.deleteTask(t.id),
+                                ),
+                                onTap: () =>
+                                    TaskEditScreen.open(context, task: t),
                               ),
                             ),
                           );

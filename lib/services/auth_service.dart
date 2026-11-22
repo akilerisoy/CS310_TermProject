@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -11,13 +13,47 @@ class AuthFailure implements Exception {
   String toString() => message;
 }
 
-class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+/// The signed-in user, for both Firebase and demo mode.
+class AppUser {
+  final String uid;
+  final String name;
+  final String email;
+  const AppUser({required this.uid, required this.name, required this.email});
 
-  Stream<User?> get userChanges => _auth.authStateChanges();
-  User? get currentUser => _auth.currentUser;
+  factory AppUser.fromFirebase(User u) =>
+      AppUser(uid: u.uid, name: u.displayName ?? '', email: u.email ?? '');
+}
+
+class AuthService {
+  /// [demo] is true when Firebase is not configured. Then log in and sign up
+  /// only work on this device and the app shows placeholder data.
+  AuthService({this.demo = false});
+  final bool demo;
+
+  // A getter, so FirebaseAuth is never touched in demo mode.
+  FirebaseAuth get _auth => FirebaseAuth.instance;
+
+  final _demoUser = StreamController<AppUser?>.broadcast();
+  AppUser? _demoCurrent;
+
+  Stream<AppUser?> get userChanges {
+    if (!demo) return _auth.authStateChanges().map((u) => u == null ? null : AppUser.fromFirebase(u));
+    return () async* {
+      yield _demoCurrent;
+      yield* _demoUser.stream;
+    }();
+  }
+
+  void _setDemoUser(AppUser? u) {
+    _demoCurrent = u;
+    _demoUser.add(u);
+  }
 
   Future<void> logIn(String email, String password) async {
+    if (demo) {
+      final e = email.trim();
+      return _setDemoUser(AppUser(uid: 'demo', name: e.split('@').first, email: e));
+    }
     try {
       await _auth.signInWithEmailAndPassword(
           email: email.trim(), password: password);
@@ -27,6 +63,9 @@ class AuthService {
   }
 
   Future<void> signUp(String name, String email, String password) async {
+    if (demo) {
+      return _setDemoUser(AppUser(uid: 'demo', name: name.trim(), email: email.trim()));
+    }
     try {
       final cred = await _auth.createUserWithEmailAndPassword(
           email: email.trim(), password: password);
@@ -44,6 +83,7 @@ class AuthService {
   }
 
   Future<void> sendReset(String email) async {
+    if (demo) return;
     try {
       await _auth.sendPasswordResetEmail(email: email.trim());
     } on FirebaseAuthException catch (e) {
@@ -53,7 +93,12 @@ class AuthService {
     }
   }
 
-  Future<void> logOut() => _auth.signOut();
+  Future<void> logOut() async {
+    if (demo) return _setDemoUser(null);
+    await _auth.signOut();
+  }
+
+  void dispose() => _demoUser.close();
 
   String _message(FirebaseAuthException e) {
     switch (e.code) {

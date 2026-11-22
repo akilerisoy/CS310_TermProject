@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +11,7 @@ import 'screens/timer_screen.dart';
 import 'services/alert_service.dart';
 import 'services/auth_service.dart';
 import 'services/notification_service.dart';
+import 'spacing.dart';
 import 'state/data_store.dart';
 import 'state/timer_controller.dart';
 import 'theme.dart';
@@ -19,15 +19,17 @@ import 'theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  String? firebaseError;
+  // Use Firebase when it is configured (`flutterfire configure`). Otherwise,
+  // or if starting it fails, run in demo mode with placeholder data.
+  var demo = true;
   try {
-    if (DefaultFirebaseOptions.isPlaceholder) {
-      throw StateError('Firebase is not configured yet. Run "flutterfire configure" '
-          '(see README.md), then start the app again.');
+    final options = DefaultFirebaseOptions.currentPlatform;
+    if (!options.apiKey.contains('REPLACE_ME')) {
+      await Firebase.initializeApp(options: options);
+      demo = false;
     }
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   } catch (e) {
-    firebaseError = e.toString();
+    debugPrint('Firebase unavailable, starting in demo mode: $e');
   }
 
   final notifications = NotificationService();
@@ -40,15 +42,17 @@ Future<void> main() async {
         create: (_) => AlertService(),
         dispose: (_, a) => a.dispose(),
       ),
-      if (firebaseError == null) Provider<AuthService>(create: (_) => AuthService()),
+      Provider<AuthService>(
+        create: (_) => AuthService(demo: demo),
+        dispose: (_, a) => a.dispose(),
+      ),
     ],
-    child: PomodoroApp(firebaseError: firebaseError),
+    child: const PomodoroApp(),
   ));
 }
 
 class PomodoroApp extends StatelessWidget {
-  const PomodoroApp({super.key, this.firebaseError});
-  final String? firebaseError;
+  const PomodoroApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -56,28 +60,9 @@ class PomodoroApp extends StatelessWidget {
       title: 'Pomodoro',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
-      home: firebaseError != null
-          ? _SetupError(message: firebaseError!)
-          : const _AuthGate(),
+      home: const _AuthGate(),
     );
   }
-}
-
-class _SetupError extends StatelessWidget {
-  const _SetupError({required this.message});
-  final String message;
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Center(
-              child: Text(message, textAlign: TextAlign.center),
-            ),
-          ),
-        ),
-      );
 }
 
 /// S1: splash until Firebase tells us whether someone is logged in, then
@@ -88,7 +73,7 @@ class _AuthGate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.read<AuthService>();
-    return StreamBuilder<User?>(
+    return StreamBuilder<AppUser?>(
       stream: auth.userChanges,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
@@ -105,7 +90,7 @@ class _AuthGate extends StatelessWidget {
 /// Creates the per-user state (Firestore data and timer) once per login.
 class _SignedIn extends StatefulWidget {
   const _SignedIn({super.key, required this.user});
-  final User user;
+  final AppUser user;
 
   @override
   State<_SignedIn> createState() => _SignedInState();
@@ -114,8 +99,9 @@ class _SignedIn extends StatefulWidget {
 class _SignedInState extends State<_SignedIn> {
   late final DataStore data = DataStore(
     uid: widget.user.uid,
-    name: widget.user.displayName ?? '',
-    email: widget.user.email ?? '',
+    name: widget.user.name,
+    email: widget.user.email,
+    demo: context.read<AuthService>().demo,
   );
   late final TimerController timer = TimerController(
     data: data,
@@ -171,16 +157,31 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     final error = context.select<DataStore, Object?>((d) => d.error);
+    final demo = context.select<DataStore, bool>((d) => d.demo);
     return Scaffold(
       body: Column(
         children: [
+          if (demo)
+            const Material(
+              color: kSoft,
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: EdgeInsets.all(Spacing.sm),
+                  child: Text(
+                      'Demo mode: Firebase is not configured, so data is placeholder '
+                      'and is not saved.',
+                      style: TextStyle(fontSize: 12)),
+                ),
+              ),
+            ),
           if (error != null)
             Material(
               color: kSoft,
               child: SafeArea(
                 bottom: false,
                 child: Padding(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(Spacing.sm),
                   child: Text('Could not sync with the server: $error',
                       style: const TextStyle(fontSize: 12)),
                 ),

@@ -29,6 +29,21 @@ Built with Flutter, Firebase Authentication and Cloud Firestore.
 
 ## Running the app
 
+**Flutter version:** 3.50.1 (stable channel), Dart 3.14.0. Check yours with `flutter --version`.
+
+### Quick start (no Firebase needed)
+
+```bash
+git clone https://github.com/akilerisoy/CS310_TermProject.git
+cd CS310_TermProject
+flutter pub get
+flutter run
+```
+
+Without a Firebase configuration the app starts in **demo mode**: log in or sign up with any valid email and password, and every screen works with placeholder tasks and study history. A banner at the top says demo mode is on. Nothing is saved in demo mode.
+
+### With Firebase (real accounts and saved data)
+
 The app follows the Step 2.1 wireframes (`CS310_Group26_Step2.1.pdf`): splash, log in, sign up, reset password, timer (focus / short break / long break), task chooser, tasks, add or edit task, stats and history, settings, and end-of-session notifications.
 
 1. Install Flutter and create a Firebase project with **Authentication (Email/Password)** and **Cloud Firestore** enabled.
@@ -70,3 +85,11 @@ The app follows the Step 2.1 wireframes (`CS310_Group26_Step2.1.pdf`): splash, l
 - The timer stores the moment the current phase ends instead of counting ticks, so it stays correct while the app is in the background or closed. A notification is scheduled for that moment.
 - Only finished focus sessions are saved to the history. Skipping a session does not save it.
 - The end-of-session sound is generated in code, so there is no audio asset.
+- If `lib/firebase_options.dart` still holds the `REPLACE_ME` placeholder values, or Firebase fails to start, the app falls back to demo mode instead of stopping.
+
+### UI resources
+
+- Colors and shared text styles: `lib/theme.dart`. Shared spacing values: `lib/spacing.dart`.
+- Custom font: Poppins, bundled in `assets/fonts/` and registered in `pubspec.yaml` (SIL Open Font License, `assets/fonts/OFL.txt`).
+- Local image: the app logo `assets/images/logo.png` (`Image.asset`, on the splash and log in screens).
+- Network image: the profile picture in Settings > Account is loaded with `Image.network` and falls back to an icon when offline.

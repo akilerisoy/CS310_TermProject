@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/models.dart';
+import '../spacing.dart';
 import '../state/data_store.dart';
 import '../theme.dart';
 
@@ -49,40 +50,40 @@ class StatsScreen extends StatelessWidget {
 
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+        padding: Spacing.pagePadding,
         children: [
           const Text('Stats',
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: kInk)),
-          const SizedBox(height: 12),
+              style: AppText.pageTitle),
+          const SizedBox(height: Spacing.md),
           Row(children: [
             Expanded(
                 child: _StatCard(
                     title: 'Today',
                     value: fmtMinutes((todaySec / 60).round()),
                     sub: '$todayCount session${todayCount == 1 ? '' : 's'}')),
-            const SizedBox(width: 12),
+            const SizedBox(width: Spacing.md),
             Expanded(
                 child: _StatCard(
                     title: 'This week',
                     value: fmtMinutes((weekSec / 60).round()),
                     sub: '$weekCount session${weekCount == 1 ? '' : 's'}')),
           ]),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.md),
           _WeekChart(minutes: perDayMin, todayIndex: today.weekday - 1),
-          const SizedBox(height: 16),
+          const SizedBox(height: Spacing.lg),
           const Text('History',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: kInk)),
-          const SizedBox(height: 4),
+          const SizedBox(height: Spacing.xs),
           if (groups.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
               child: Text('No finished sessions yet. Complete a focus session on the timer.',
-                  style: TextStyle(color: kMuted)),
+                  style: AppText.muted),
             ),
           for (final e in groups.entries) ...[
             Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 4),
-              child: Text(label(e.key), style: const TextStyle(color: kMuted, fontSize: 12)),
+              child: Text(label(e.key), style: AppText.label),
             ),
             for (final s in e.value)
               Container(
@@ -94,7 +95,7 @@ class StatsScreen extends StatelessWidget {
                   SizedBox(
                     width: 56,
                     child: Text(DateFormat('HH:mm').format(s.endedAt),
-                        style: const TextStyle(color: kMuted)),
+                        style: AppText.muted),
                   ),
                   Expanded(
                     child: Text(s.taskTitle ?? 'No task',
@@ -102,7 +103,7 @@ class StatsScreen extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(color: s.taskTitle == null ? kMuted : kInk)),
                   ),
-                  Text('${s.minutes} min', style: const TextStyle(color: kMuted)),
+                  Text('${s.minutes} min', style: AppText.muted),
                 ]),
               ),
           ],
@@ -119,14 +120,14 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: Spacing.box,
       decoration: BoxDecoration(
         border: Border.all(color: kLine),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: const TextStyle(color: kMuted, fontSize: 12)),
-        const SizedBox(height: 2),
+        Text(title, style: AppText.label),
+        const SizedBox(height: Spacing.xxs),
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(value,
@@ -149,7 +150,7 @@ class _WeekChart extends StatelessWidget {
     final maxV = minutes.fold<int>(0, (a, b) => b > a ? b : a);
     const maxBar = 110.0;
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: Spacing.box,
       decoration: BoxDecoration(
         border: Border.all(color: kLine),
         borderRadius: BorderRadius.circular(14),
@@ -157,7 +158,7 @@ class _WeekChart extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text('Minutes studied per day',
             style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacing.sm),
         SizedBox(
           height: maxBar + 44,
           child: Row(
@@ -170,7 +171,7 @@ class _WeekChart extends StatelessWidget {
                     children: [
                       Text(minutes[i] > 0 ? '${minutes[i]}' : '',
                           style: const TextStyle(fontSize: 10, color: kMuted)),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: Spacing.xxs),
                       Container(
                         width: 22,
                         height: maxV == 0 ? 3 : (minutes[i] / maxV * maxBar).clamp(3.0, maxBar),
@@ -179,7 +180,7 @@ class _WeekChart extends StatelessWidget {
                           borderRadius: BorderRadius.circular(3),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: Spacing.xs),
                       Text(days[i],
                           style: TextStyle(
                               fontSize: 11,

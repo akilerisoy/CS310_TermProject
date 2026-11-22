@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
+import '../spacing.dart';
 import '../state/data_store.dart';
 import '../state/timer_controller.dart';
 import '../theme.dart';
@@ -25,16 +26,16 @@ class TimerScreen extends StatelessWidget {
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: box.maxHeight),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: Spacing.page, vertical: Spacing.lg),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(t.title,
                       style: const TextStyle(
                           fontSize: 24, fontWeight: FontWeight.w800, color: kInk)),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: Spacing.sm),
                   _Dots(t),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: Spacing.xl),
                   SizedBox(
                     width: ring,
                     height: ring,
@@ -51,7 +52,7 @@ class TimerScreen extends StatelessWidget {
                                     color: kInk,
                                     fontFeatures: const [FontFeature.tabularFigures()])),
                             Text('of ${fmtClock(t.totalSeconds)}',
-                                style: const TextStyle(color: kMuted, fontSize: 12)),
+                                style: AppText.label),
                             if (t.isBreak && t.isPaused)
                               Container(
                                 margin: const EdgeInsets.only(top: 6),
@@ -70,9 +71,9 @@ class TimerScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: Spacing.xxl),
                   _TaskCard(t: t, taskTitle: task?.title),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: Spacing.xxl),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,8 +132,8 @@ class _Dots extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ...dots,
-        const SizedBox(width: 8),
-        Text(t.subtitle, style: const TextStyle(color: kMuted, fontSize: 12)),
+        const SizedBox(width: Spacing.sm),
+        Text(t.subtitle, style: AppText.label),
       ],
     );
   }
@@ -178,16 +179,16 @@ class _TaskCard extends StatelessWidget {
       final next = t.phase == Phase.longBreak ? 1 : t.sessionInCycle + 1;
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(14),
+        padding: Spacing.box,
         decoration: BoxDecoration(
           border: Border.all(color: kLine),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('Up next: session $next of ${t.cycleLength}',
-              style: const TextStyle(color: kMuted, fontSize: 12)),
-          const SizedBox(height: 2),
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+              style: AppText.label),
+          const SizedBox(height: Spacing.xxs),
+          Text(label, style: AppText.strong),
         ]),
       );
     }
@@ -202,12 +203,12 @@ class _TaskCard extends StatelessWidget {
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Text('Task for this session',
-                style: TextStyle(color: kMuted, fontSize: 12)),
-            const SizedBox(height: 2),
+                style: AppText.label),
+            const SizedBox(height: Spacing.xxs),
             Text(label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w700)),
+                style: AppText.strong),
           ]),
         ),
         TextButton(
@@ -276,7 +277,7 @@ Future<void> chooseTask(BuildContext context) async {
             constraints:
                 BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.75),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              padding: const EdgeInsets.fromLTRB(Spacing.page, 0, Spacing.page, Spacing.lg),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,8 +285,8 @@ Future<void> chooseTask(BuildContext context) async {
                   const Text('Choose a task',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                   const Text('Time from this session will count toward it.',
-                      style: TextStyle(color: kMuted, fontSize: 12)),
-                  const SizedBox(height: 8),
+                      style: AppText.label),
+                  const SizedBox(height: Spacing.sm),
                   Flexible(
                     child: ListView(
                       shrinkWrap: true,
@@ -306,21 +307,18 @@ Future<void> chooseTask(BuildContext context) async {
                           contentPadding: EdgeInsets.zero,
                           leading: const Icon(Icons.add, color: kInk),
                           title: const Text('New task',
-                              style: TextStyle(fontWeight: FontWeight.w700)),
+                              style: AppText.strong),
                           onTap: () async {
                             Navigator.pop(sheetCtx);
-                            final id = await Navigator.of(context).push<String>(
-                              MaterialPageRoute(
-                                  builder: (_) => const TaskEditScreen(),
-                                  fullscreenDialog: true),
-                            );
+                            final id = await TaskEditScreen.open(context,
+                                fullscreenDialog: true);
                             if (id != null) timer.selectTask(id);
                           },
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: Spacing.sm),
                   FilledButton(
                     onPressed: () {
                       timer.selectTask(selected);
@@ -362,7 +360,7 @@ class _TaskOption extends StatelessWidget {
         child: Row(children: [
           Icon(selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
               color: muted && !selected ? kMuted : kInk),
-          const SizedBox(width: 12),
+          const SizedBox(width: Spacing.md),
           Expanded(
             child: Text(label,
                 style: TextStyle(color: muted ? kMuted : kInk),

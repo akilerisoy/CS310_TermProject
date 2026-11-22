@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../services/alert_service.dart';
 import '../services/auth_service.dart';
 import '../services/notification_service.dart';
+import '../spacing.dart';
 import '../state/data_store.dart';
 import '../state/timer_controller.dart';
 import '../theme.dart';
@@ -19,15 +20,15 @@ class SettingsScreen extends StatelessWidget {
 
     Widget section(String t) => Padding(
           padding: const EdgeInsets.only(top: 18, bottom: 4),
-          child: Text(t, style: const TextStyle(color: kMuted, fontSize: 12)),
+          child: Text(t, style: AppText.label),
         );
 
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+        padding: Spacing.pagePadding,
         children: [
           const Text('Settings',
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: kInk)),
+              style: AppText.pageTitle),
           section('Timer'),
           _Stepper(
             label: 'Focus',
@@ -68,7 +69,7 @@ class SettingsScreen extends StatelessWidget {
           section('Sound and alerts'),
           Row(children: [
             const Text('Volume'),
-            const SizedBox(width: 16),
+            const SizedBox(width: Spacing.lg),
             const Icon(Icons.volume_down, size: 18, color: kMuted),
             Expanded(
               child: Slider(
@@ -97,15 +98,29 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
           section('Account'),
-          Text(data.name.isEmpty ? 'Signed in' : data.name,
-              style: const TextStyle(fontWeight: FontWeight.w800)),
-          Text(data.email, style: const TextStyle(color: kMuted, fontSize: 12)),
-          const SizedBox(height: 8),
+          Row(children: [
+            _Avatar(name: data.name.isEmpty ? data.email : data.name),
+            const SizedBox(width: Spacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(data.name.isEmpty ? 'Signed in' : data.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w800)),
+                  Text(data.email,
+                      maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.label),
+                ],
+              ),
+            ),
+          ]),
+          const SizedBox(height: Spacing.sm),
           TextButton.icon(
             style: TextButton.styleFrom(
                 foregroundColor: kInk, alignment: Alignment.centerLeft),
             icon: const Icon(Icons.logout),
-            label: const Text('Log out', style: TextStyle(fontWeight: FontWeight.w700)),
+            label: const Text('Log out', style: AppText.strong),
             onPressed: () async {
               final timer = context.read<TimerController>();
               final auth = context.read<AuthService>();
@@ -149,7 +164,7 @@ class _Stepper extends StatelessWidget {
           width: 84,
           child: Text('$value $unit',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.w700)),
+              style: AppText.strong),
         ),
         IconButton(
           tooltip: 'Increase $label',
@@ -157,6 +172,36 @@ class _Stepper extends StatelessWidget {
           onPressed: value + step <= max ? () => onChanged(value + step) : null,
         ),
       ]),
+    );
+  }
+}
+
+/// Profile picture loaded from the network (initials avatar). Shows an icon
+/// while loading or when there is no internet connection.
+class _Avatar extends StatelessWidget {
+  const _Avatar({required this.name});
+  final String name;
+
+  static const double size = 44;
+
+  @override
+  Widget build(BuildContext context) {
+    final url = 'https://api.dicebear.com/9.x/initials/png'
+        '?seed=${Uri.encodeComponent(name)}&backgroundColor=3f3f3f';
+    const fallback = ColoredBox(
+      color: kTrack,
+      child: Center(child: Icon(Icons.person_outline, color: kInk)),
+    );
+    return ClipOval(
+      child: SizedBox.square(
+        dimension: size,
+        child: Image.network(
+          url,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, progress) => progress == null ? child : fallback,
+          errorBuilder: (context, error, stack) => fallback,
+        ),
+      ),
     );
   }
 }
